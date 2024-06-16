@@ -11,28 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Checks out the repository."
+      - name: "Check out the repository."
         uses: "actions/checkout@v2"
 
-      - name: "Setup NodeJS."
+      - name: "Set up Node.js."
         uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Updated Node.js version to LTS
+          node-version: '20'
 
       - name: "Cache NPM dependencies"
-        id: cache-npm-deps
+        id: cache-npm
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
       - name: "Install NPM dependencies if package.json exists."
-        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
+        if: steps.cache-npm.outputs.cache-hit != 'true'
         run: |
           if [ -f package.json ]; then
-            npm install
+            npm ci
           else
             echo "No package.json file found, skipping npm install."
           fi
