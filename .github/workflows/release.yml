@@ -30,11 +30,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: "Install NPM dependencies if package.json exists."
-        if: steps.cache-npm.outputs.cache-hit != 'true'
+      - name: "Check if package-lock.json is in sync"
         run: |
           if [ -f package.json ]; then
-            npm ci
+            if ! npm install --dry-run; then
+              echo "package-lock.json is out of sync with package.json"
+              exit 1
+            fi
+          fi
+
+      - name: "Install NPM dependencies"
+        run: |
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
           else
             echo "No package.json file found, skipping npm install."
           fi
