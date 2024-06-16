@@ -14,7 +14,6 @@
  * Update URI:        https://example.com/my-plugin/
  * Text Domain:       my-basics-plugin
  * Domain Path:       /languages
- * Requires Plugins:  my-plugin, yet-another-plugin
  */
 
 
