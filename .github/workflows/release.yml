@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Checks out the repository."
+      - name: "Check out the repository."
         uses: "actions/checkout@v2"
 
-      - name: "Setup NodeJS."
+      - name: "Set up NodeJS."
         uses: actions/setup-node@v2
         with:
           node-version: '20'  # Updated Node.js version to LTS
@@ -23,19 +23,34 @@ jobs:
         id: cache-npm-deps
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+            ${{ runner.os }}-
+
+      - name: "Debug: List Cache Directory"
+        run: ls -la ~/.npm
+        if: always()
+
+      - name: "Debug: List Node Modules"
+        run: ls -la node_modules
+        if: always()
 
       - name: "Install NPM dependencies if package.json exists."
-        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
         run: |
           if [ -f package.json ]; then
-            npm install
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
           else
             echo "No package.json file found, skipping npm install."
           fi
+        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
 
       - name: "Build release: Stable if package.json exists."
         run: |
@@ -54,8 +69,7 @@ jobs:
           fi
 
       - name: "Create a Release Archive"
-        run: |
-          zip -r test-selfhost.zip .
+        run: zip -r test-selfhost.zip .
 
       - name: "Create a GitHub Release"
         uses: softprops/action-gh-release@v1
