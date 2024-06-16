@@ -17,7 +17,7 @@ jobs:
       - name: "Setup NodeJS."
         uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Updated Node.js version
+          node-version: '20'  # Updated Node.js version to LTS
 
       - name: "Install NPM dependencies if package.json exists."
         run: |
@@ -27,8 +27,13 @@ jobs:
             echo "No package.json file found, skipping npm install."
           fi
 
-      - name: "Build release: Stable"
-        run: npm run build
+      - name: "Build release: Stable if package.json exists."
+        run: |
+          if [ -f package.json ]; then
+            npm run build
+          else
+            echo "No package.json file found, skipping npm run build."
+          fi
 
       - name: "Remove files based on .distignore"
         run: |
