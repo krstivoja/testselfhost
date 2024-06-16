@@ -19,8 +19,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: "Ensure npm cache directory exists"
-        run: mkdir -p ~/.npm
+      - name: "Ensure npm cache and node_modules directories exist"
+        run: |
+          mkdir -p ~/.npm
+          mkdir -p node_modules
 
       - name: "Cache NPM dependencies"
         id: cache-npm-deps
@@ -38,7 +40,7 @@ jobs:
         run: ls -la ~/.npm
         if: always()
 
-      - name: "Debug: List Node Modules"
+      - name: "Debug: List Node Modules Directory"
         run: ls -la node_modules
         if: always()
 
