@@ -20,22 +20,25 @@ jobs:
           node-version: '20'  # Updated Node.js version to LTS
 
       - name: "Cache NPM dependencies"
-        id: cache-npm-deps
+        id: cache-npm
         uses: actions/cache@v3
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+            ${{ runner.os }}-
 
       - name: "Install NPM dependencies if package.json exists."
-        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
         run: |
           if [ -f package.json ]; then
-            npm install
+            npm ci
           else
             echo "No package.json file found, skipping npm install."
           fi
+        if: steps.cache-npm.outputs.cache-hit != 'true'
 
       - name: "Build release: Stable if package.json exists."
         run: |
@@ -54,8 +57,7 @@ jobs:
           fi
 
       - name: "Create a Release Archive"
-        run: |
-          zip -r test-selfhost.zip .
+        run: zip -r test-selfhost.zip .
 
       - name: "Create a GitHub Release"
         uses: softprops/action-gh-release@v1
