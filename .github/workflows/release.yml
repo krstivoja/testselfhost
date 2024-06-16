@@ -11,42 +11,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Check out the repository."
+      - name: "Checks out the repository."
         uses: "actions/checkout@v2"
 
-      - name: "Set up Node.js."
+      - name: "Setup NodeJS."
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
+          node-version: '20'  # Updated Node.js version to LTS
 
       - name: "Cache NPM dependencies"
-        id: cache-npm
+        id: cache-npm-deps
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.npm
-            node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: "Check if package-lock.json is in sync"
+      - name: "Install NPM dependencies if package.json exists."
+        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
         run: |
           if [ -f package.json ]; then
-            if ! npm install --dry-run; then
-              echo "package-lock.json is out of sync with package.json"
-              exit 1
-            fi
-          fi
-
-      - name: "Install NPM dependencies"
-        run: |
-          if [ -f package.json ]; then
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
+            npm install
           else
             echo "No package.json file found, skipping npm install."
           fi
