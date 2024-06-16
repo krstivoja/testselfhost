@@ -20,6 +20,7 @@ jobs:
           node-version: '20'  # Updated Node.js version to LTS
 
       - name: "Cache NPM dependencies"
+        id: cache-npm-deps
         uses: actions/cache@v3
         with:
           path: ~/.npm
@@ -28,6 +29,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: "Install NPM dependencies if package.json exists."
+        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
         run: |
           if [ -f package.json ]; then
             npm install
