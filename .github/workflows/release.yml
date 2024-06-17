@@ -11,21 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Check out the repository."
+      - name: "Checks out the repository."
         uses: "actions/checkout@v2"
 
-      - name: "Set up NodeJS."
+      - name: "Setup NodeJS."
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
-
-      - name: "Ensure npm cache and node_modules directories exist"
-        run: |
-          mkdir -p ~/.npm
-          mkdir -p node_modules
+          node-version: '20'  # Updated Node.js version to LTS
 
       - name: "Cache NPM dependencies"
-        id: cache-npm-deps
+        id: cache-npm
         uses: actions/cache@v3
         with:
           path: |
@@ -36,26 +31,14 @@ jobs:
             ${{ runner.os }}-node-
             ${{ runner.os }}-
 
-      - name: "Debug: List Cache Directory"
-        run: ls -la ~/.npm
-        if: always()
-
-      - name: "Debug: List Node Modules Directory"
-        run: ls -la node_modules
-        if: always()
-
       - name: "Install NPM dependencies if package.json exists."
         run: |
           if [ -f package.json ]; then
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
+            npm ci
           else
             echo "No package.json file found, skipping npm install."
           fi
-        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
+        if: steps.cache-npm.outputs.cache-hit != 'true'
 
       - name: "Build release: Stable if package.json exists."
         run: |
