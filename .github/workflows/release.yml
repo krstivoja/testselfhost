@@ -24,26 +24,18 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
           restore-keys: |
+            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
             ${{ runner.os }}-node-
 
-      - name: "Install NPM dependencies if package.json exists."
-        if: steps.cache-npm-deps.outputs.cache-hit != 'true'
+      - name: "Install NPM dependencies"
         run: |
-          if [ -f package.json ]; then
-            npm install
-          else
-            echo "No package.json file found, skipping npm install."
-          fi
+          npm ci
 
-      - name: "Build release: Stable if package.json exists."
+      - name: "Build release: Stable"
         run: |
-          if [ -f package.json ]; then
-            npm run build
-          else
-            echo "No package.json file found, skipping npm run build."
-          fi
+          npm run build
 
       - name: "Remove files based on .distignore"
         run: |
@@ -53,9 +45,15 @@ jobs:
             echo ".distignore file not found."
           fi
 
+      - name: "Copy only changed files to distribution directory"
+        run: |
+          mkdir -p dist
+          rsync -a --delete --exclude='dist/' ./ dist/
+
       - name: "Create a Release Archive"
         run: |
-          zip -r test-selfhost.zip .
+          cd dist
+          zip -r ../test-selfhost.zip .
 
       - name: "Create a GitHub Release"
         uses: softprops/action-gh-release@v1
