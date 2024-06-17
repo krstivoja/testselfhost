@@ -55,4 +55,4 @@ jobs:
         with:
           files: test.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.SELFHOST_TOKEN }}  # Ensure this token has the right permissions
+          GITHUB_TOKEN: ${{ secrets.SELFHOST_TOKEN }}  # Ensure you add your own token
