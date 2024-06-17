@@ -30,7 +30,12 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: "Install NPM dependencies"
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: "Build release: Stable"
         run: npm run build
