@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+*'
+      - '[0-9]+*.[0-9]+*'  # Matches tags with numbers and decimals such as 1, 2, 1.2, 1.1, 2.0, etc.
 
 jobs:
   dist:
@@ -17,7 +17,7 @@ jobs:
       - name: "Setup NodeJS."
         uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Updated Node.js version to LTS
+          node-version: '20'  # Use the latest LTS version of Node.js
 
       - name: "Cache NPM dependencies"
         id: cache-npm-deps
@@ -30,38 +30,24 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: "Install NPM dependencies"
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci
 
       - name: "Build release: Stable"
-        run: |
-          npm run build
+        run: npm run build
 
-      - name: "Remove files based on .distignore"
-        run: |
-          if [ -f .distignore ]; then
-            cat .distignore | xargs rm -rf
-          else
-            echo ".distignore file not found."
-          fi
-
-      - name: "Copy only changed files to distribution directory"
+      - name: "Copy files to distribution directory excluding .distignore entries"
         run: |
           mkdir -p dist
-          rsync -a --delete --exclude='dist/' --exclude='node_modules/' ./ dist/
+          rsync -a --delete --exclude-from='.distignore' --exclude='dist/' --exclude='node_modules/' ./ dist/
 
       - name: "Create a Release Archive"
         run: |
           cd dist
-          zip -r ../test-selfhost.zip . -x "node_modules/*"
+          zip -r ../test.zip . -x "node_modules/*"
 
       - name: "Create a GitHub Release"
         uses: softprops/action-gh-release@v1
         with:
-          files: test-selfhost.zip
+          files: test.zip
         env:
           GITHUB_TOKEN: ${{ secrets.SELFHOST_TOKEN }}  # Ensure this token has the right permissions
