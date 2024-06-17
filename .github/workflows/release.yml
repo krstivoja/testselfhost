@@ -52,12 +52,12 @@ jobs:
       - name: "Copy only changed files to distribution directory"
         run: |
           mkdir -p dist
-          rsync -a --delete --exclude='dist/' ./ dist/
+          rsync -a --delete --exclude='dist/' --exclude='node_modules/' ./ dist/
 
       - name: "Create a Release Archive"
         run: |
           cd dist
-          zip -r ../test-selfhost.zip .
+          zip -r ../test-selfhost.zip . -x "node_modules/*"
 
       - name: "Create a GitHub Release"
         uses: softprops/action-gh-release@v1
