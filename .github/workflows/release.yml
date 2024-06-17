@@ -33,12 +33,15 @@ jobs:
       - name: "Copy files to distribution directory excluding .distignore entries"
         run: |
           mkdir -p dist
-          rsync -a --delete --exclude-from='.distignore' --exclude='dist/' --exclude='node_modules/' ./ dist/
+          rsync -a --delete --exclude-from='.distignore' ./ dist/
 
       - name: "Create a Release Archive"
         run: |
           cd dist
-          zip -r ../test.zip . -x "node_modules/*"
+          zip -r ../test.zip .
+
+      - name: "Debug: List Distribution Directory"
+        run: ls -la dist
 
       - name: "Create a GitHub Release"
         uses: softprops/action-gh-release@v1
