@@ -1,3 +1,6 @@
+.git
 .github
 .distignore
 test.md
+
+package.json
