@@ -24,9 +24,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}-node_modules
           restore-keys: |
-            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
             ${{ runner.os }}-node-
 
       - name: "Install NPM dependencies"
@@ -55,4 +55,4 @@ jobs:
         with:
           files: test.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.SELFHOST_TOKEN }}  # Ensure you add your own token
+          GITHUB_TOKEN: ${{ secrets.SELFHOST_TOKEN }}  # Ensure this token has the right permissions
